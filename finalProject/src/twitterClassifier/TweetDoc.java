@@ -10,7 +10,9 @@ public class TweetDoc {
 	private ArrayList<String> hashTags;
 	
 	public TweetDoc(Tweet t){
+		hashTags = new ArrayList<String>();
 		userID = t.getFromUser();
+		tweetText = cleanText(t.getText());
 	}
 
 	public String getTweetText() {
@@ -18,7 +20,7 @@ public class TweetDoc {
 	}
 
 	public void setTweetText(String tweetText) {
-		this.tweetText = tweetText;
+		this.tweetText = cleanText(tweetText);
 	}
 
 	public String getUserID() {
@@ -38,15 +40,26 @@ public class TweetDoc {
 	}
 	
 	private String cleanText(String text){
+		// replace all links with empty strings
 		String retval = text.replaceAll("(https?://([-\\w\\.]+)+(:\\d+)?(/([\\w/_\\.]*(\\?\\S+)?)?)?)", "");
 		
-		return "Not implemented yet\n";
-	}
-	
-	private ArrayList<String> getHashTags(String inputText){
-		ArrayList<String> retval = new ArrayList<String>();
-		return retval;
+		// replace all @ references
+		retval = retval.replaceAll("@[\\w*\\d([\\^$()#%)]]*", "");
 		
+		// replace all RT's
+		retval = retval.replaceAll("RT:?", "");
+		
+		// get all # tags
+		String[] splitString = retval.split(" ");
+		for(String s : splitString){
+			if(s.startsWith("#")){
+				this.hashTags.add(s);
+			}
+		}
+		
+		// remove all hash tags
+		retval = retval.replaceAll("#\\w*", "");
+		return retval;
 	}
 	
 }

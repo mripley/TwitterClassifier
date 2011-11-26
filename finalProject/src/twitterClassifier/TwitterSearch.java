@@ -1,4 +1,5 @@
 package twitterClassifier;
+import java.util.ArrayList;
 import java.util.List;
 
 import twitter4j.QueryResult;
@@ -15,7 +16,9 @@ public class TwitterSearch {
 		twitter = new TwitterFactory().getInstance();
 	}
 	
-	public void search(String queryString){
+	public ArrayList<TweetDoc> search(String queryString){
+		ArrayList<TweetDoc> retval = new ArrayList<TweetDoc>();
+		
 	    Query query = new Query(queryString);
 	    query.setRpp(100);
 	    query.setLang("en");
@@ -23,15 +26,15 @@ public class TwitterSearch {
 		try {
 			result = twitter.search(query);
 			List<Tweet> results = result.getTweets();
-			System.out.println("Total number of results: " + results.size());
-		    for (Tweet tweet : results) {
-		        System.out.println(tweet.getFromUser() + ":" + tweet.getText());
-		    }
+			for(Tweet t : results){
+				retval.add(new TweetDoc(t));
+			}
 		    
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
-
+		
+		return retval;
 	}
-
+	
 }
