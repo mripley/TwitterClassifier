@@ -59,6 +59,8 @@ public class TweetDoc {
 		
 		// remove all hash tags
 		retval = retval.replaceAll("#\\w*", "");
+		
+		retval = retval.replaceAll("^\\w*", "");
 		return retval;
 	}
 	

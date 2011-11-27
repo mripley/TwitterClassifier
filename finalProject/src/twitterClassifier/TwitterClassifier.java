@@ -1,19 +1,12 @@
 package twitterClassifier;
 
-import java.util.ArrayList;
-
-public class TwitterClassifier {
+public abstract class TwitterClassifier {
 	
-	public static void main(String[] args){
-		System.out.println("Twitter test running");
-		TwitterSearch ts = new TwitterSearch();
-		ArrayList<TweetDoc> docs = ts.search("iPhone");	
+	public TwitterClassifier(){
 		
-		for(TweetDoc t : docs){
-			System.out.println("From: " + t.getUserID() + " Text: " + t.getTweetText());
-		}
-		
-		System.out.println("done");
 	}
+	
+	public abstract void classify(String query);
+	protected abstract void buildClassifier(String trainingFile);
 	
 }
