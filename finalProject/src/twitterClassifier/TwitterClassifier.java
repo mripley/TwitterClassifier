@@ -16,7 +16,7 @@ import org.apache.lucene.util.Version;
 
 public abstract class TwitterClassifier {
 	
-    private RAMDirectory index = new RAMDirectory();
+    protected RAMDirectory index = new RAMDirectory();
    	private IndexWriter writer = null;
     
 	public TwitterClassifier(){
@@ -52,6 +52,9 @@ public abstract class TwitterClassifier {
 				}
 				else if(currentLine.startsWith("^^NEGATIVE^^")){
 					curSentiment = "negative"; // we've switched from positive docs to negative docs.
+				}
+				else if(currentLine.startsWith("^^^POSITIVE^^^")){
+					continue;
 				}
 				else{
 					// found a regular line. Add it to the buffer and continue

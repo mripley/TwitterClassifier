@@ -6,6 +6,7 @@ public class TwitterSearcher {
 	public static void main(String[] args){
 		System.out.println("Twitter test running");
 		TwitterSearch ts = new TwitterSearch();
+		LuceneClassifier classifier = new LuceneClassifier("training-set.txt");
 		ArrayList<TweetDoc> docs = ts.search("iPhone review");	
 		
 		for(TweetDoc t : docs){
