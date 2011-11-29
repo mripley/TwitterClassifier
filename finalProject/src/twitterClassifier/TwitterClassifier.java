@@ -17,7 +17,7 @@ import org.apache.lucene.util.Version;
 public abstract class TwitterClassifier {
 	
     protected RAMDirectory index = new RAMDirectory();
-   	private IndexWriter writer = null;
+    protected double categoryRatio;
     
 	public TwitterClassifier(){
 		
@@ -37,7 +37,7 @@ public abstract class TwitterClassifier {
 			// create a new index
 			index = new RAMDirectory();		// Create a new index in RAM
 			IndexWriterConfig indexConfig = new IndexWriterConfig(Version.LUCENE_34, new StandardAnalyzer(Version.LUCENE_34));
-			writer = new IndexWriter(index, indexConfig);
+			IndexWriter writer = new IndexWriter(index, indexConfig);
 			
 			// loop through all lines
 			while((currentLine = reader.readLine()) != null){

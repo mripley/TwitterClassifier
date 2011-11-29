@@ -10,6 +10,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.util.Version;
 import org.apache.lucene.search.CachingWrapperFilter;
 import org.apache.lucene.search.DocIdSetIterator;
@@ -24,10 +25,12 @@ public class LuceneClassifier extends TwitterClassifier {
 	private boolean overfit;
 	private Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_34);
 	private HashMap<String, double[]> wordSet;
+	private String curSentiment;
 	
-	public LuceneClassifier(String trainingFile){
+	public LuceneClassifier(String trainingFile, String sentiment){
 		// build the index
 		buildIndex(trainingFile);
+		this.curSentiment = sentiment;
 		trainClassifier(trainingFile);
 	}
 	
@@ -41,9 +44,19 @@ public class LuceneClassifier extends TwitterClassifier {
 	protected void trainClassifier(String trainingFile){
 		wordSet = new HashMap<String, double[]>();
 		IndexReader reader = null;
-		
 		try {
 			reader = IndexReader.open(index);
+			Set<Integer> matchedDocs = getMatchingDocs(reader, this.curSentiment);
+			double matchedDocSize = matchedDocs.size();
+			double nDocs = reader.numDocs();
+			
+			// compute the ratio of mactched docs to total docs
+			this.categoryRatio = matchedDocSize/nDocs;
+			
+			// grab all the individual terms out of all matched docs. 
+			TermEnum docTerms = reader.terms();
+			
+			
 			
 		} catch (CorruptIndexException e) {
 			// TODO Auto-generated catch block
