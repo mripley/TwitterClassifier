@@ -17,14 +17,13 @@ import org.apache.lucene.util.Version;
 public abstract class TwitterClassifier {
 	
     protected RAMDirectory index = new RAMDirectory();
-    protected double categoryRatio;
     
 	public TwitterClassifier(){
 		
 	}
 	
 	public abstract void classify(String query);
-	protected abstract void trainClassifier(String trainingFile);
+	protected abstract void trainClassifier(String trainingFile) throws Exception;
 	
 	protected void buildIndex(String trainingFile){
 		String currentLine; // current line in the file

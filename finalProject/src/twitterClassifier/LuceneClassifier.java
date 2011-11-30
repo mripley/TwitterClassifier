@@ -3,6 +3,7 @@ package twitterClassifier;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -10,6 +11,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.util.Version;
 import org.apache.lucene.search.CachingWrapperFilter;
@@ -26,12 +28,38 @@ public class LuceneClassifier extends TwitterClassifier {
 	private Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_34);
 	private HashMap<String, double[]> wordSet;
 	private String curSentiment;
+    protected double categoryRatio;
 	
 	public LuceneClassifier(String trainingFile, String sentiment){
 		// build the index
 		buildIndex(trainingFile);
 		this.curSentiment = sentiment;
-		trainClassifier(trainingFile);
+		this.overfit = false;
+		this.topFeatures = false;
+		
+		try {
+			trainClassifier(trainingFile);
+		} 
+		catch (Exception e) {
+			System.out.println("Caught IO Exception in LuceneClassifier Constructor");
+			e.printStackTrace();
+		}
+	}
+	
+	public LuceneClassifier(String trainingFile, String sentiment, boolean overfit, boolean topFeatureExtract){
+		// build the index
+		buildIndex(trainingFile);
+		this.curSentiment = sentiment;
+		this.overfit = overfit;
+		this.topFeatures = topFeatureExtract;
+		try {
+			trainClassifier(trainingFile);
+		} 
+		catch (Exception e) {
+			System.out.println("Caught IO Exception in LuceneClassifier Constructor");
+			e.printStackTrace();
+		}
+		
 	}
 	
 	@Override
@@ -41,7 +69,7 @@ public class LuceneClassifier extends TwitterClassifier {
 	}
 
 	@Override
-	protected void trainClassifier(String trainingFile){
+	protected void trainClassifier(String trainingFile) throws Exception{
 		wordSet = new HashMap<String, double[]>();
 		IndexReader reader = null;
 		try {
@@ -50,20 +78,77 @@ public class LuceneClassifier extends TwitterClassifier {
 			double matchedDocSize = matchedDocs.size();
 			double nDocs = reader.numDocs();
 			
-			// compute the ratio of mactched docs to total docs
+			// compute the ratio of matched docs to total docs
 			this.categoryRatio = matchedDocSize/nDocs;
 			
 			// grab all the individual terms out of all matched docs. 
 			TermEnum docTerms = reader.terms();
 			
+			double nWords = 0;
+			double nUniqueWords = 0;
+			while(docTerms.next()){
+				double nWordsInCat = 0;
+				double nWordsNotInCat = 0;
+				Term t = docTerms.term();
+				TermDocs termDocs = reader.termDocs(t);
+				
+				while(termDocs.next()){
+					int docId = termDocs.doc();
+					int freq = termDocs.freq();
+					
+					if(matchedDocs.contains(docId)){
+						nWordsInCat += freq;
+					}
+					else{
+						nWordsNotInCat += freq;
+					}
+					nWords += freq;
+					nUniqueWords++;
+				}
+				double pWord[] = new double[2];
+				if(wordSet.containsKey(t.text())){
+					pWord = wordSet.get(t.text());
+				}
+				pWord[0] += (double)nWordsInCat;
+				pWord[1] += (double)nWordsNotInCat;
+				wordSet.put(t.text(), pWord);
+			}
 			
+			// normalize the values in the pWords array to get probabilities instead 
+			// of raw numbers
+			for(String term : wordSet.keySet()){
+				double[] probs = wordSet.get(term);
+				for(int i=0; i< probs.length; i++){
+					if(overfit){
+						probs[i] = ((probs[i]+1) / (nWords + nUniqueWords)); 
+					}
+					else{
+						probs[i] /= nWords;
+					}
+				}
+			}
 			
-		} catch (CorruptIndexException e) {
-			// TODO Auto-generated catch block
+			if(topFeatures){
+				InfoGainSelector selector = new InfoGainSelector();
+				selector.setWordProbs(wordSet);
+				selector.setpCategory(matchedDocSize/nDocs);
+				this.wordSet  = (HashMap<String, double[]>)selector.getFeatures();
+			}		
+			
+			reader.close();
+		} 
+		catch (CorruptIndexException e) {
+			System.out.println("ERROR: Caught Corrupt Index exception during training");
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
+			System.out.println("ERROR: Caught IO Exception during training");
 			e.printStackTrace();
+		}
+		finally{
+			if(reader != null){
+				reader.close();
+			}
 		}
 	}
 	
@@ -73,7 +158,7 @@ public class LuceneClassifier extends TwitterClassifier {
 	    try {
 	    	Filter categoryFilter = new CachingWrapperFilter(
 			      new QueryWrapperFilter(new TermQuery(
-			      new Term("sentiment", "positive"))));
+			      new Term("sentiment", category))));
 		
 		    DocIdSet docIdSet;
 		    docIdSet = categoryFilter.getDocIdSet(reader);
