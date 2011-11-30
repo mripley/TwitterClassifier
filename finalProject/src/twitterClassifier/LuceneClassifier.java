@@ -64,7 +64,6 @@ public class LuceneClassifier extends TwitterClassifier {
 	
 	@Override
 	public void classify(String query) {
-		// TODO Auto-generated method stub
 		
 	}
 
