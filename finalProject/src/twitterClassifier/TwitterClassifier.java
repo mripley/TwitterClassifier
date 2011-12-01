@@ -10,6 +10,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
@@ -40,12 +41,12 @@ public abstract class TwitterClassifier {
 			
 			// loop through all lines
 			while((currentLine = reader.readLine()) != null){
-				if(currentLine.startsWith("^^END^^")){	// found the end of the document
+				if(currentLine.startsWith("^^^END^^^")){	// found the end of the document
 					
 					addDocument(writer, buf.toString(), curSentiment);
 					buf = new StringBuffer();  // empty the buffer
 				}
-				else if(currentLine.startsWith("^^NEGATIVE^^")){
+				else if(currentLine.startsWith("^^^NEGATIVE^^^")){
 					curSentiment = "negative"; // we've switched from positive docs to negative docs.
 				}
 				else if(currentLine.startsWith("^^^POSITIVE^^^")){
@@ -75,6 +76,7 @@ public abstract class TwitterClassifier {
 		doc.add(new Field("text", text, Store.YES, Index.ANALYZED));
 		doc.add(new Field("sentiment", sentiment, Store.YES, Index.ANALYZED));
 		try {
+		
 			writer.addDocument(doc);
 		} catch (CorruptIndexException e) {
 			System.out.println("Corrupt index in addDocument");

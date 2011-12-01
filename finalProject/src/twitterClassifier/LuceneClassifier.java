@@ -57,6 +57,7 @@ public class LuceneClassifier extends TwitterClassifier {
 	
 	public LuceneClassifier(String trainingFile, String sentiment, boolean overfit, boolean topFeatureExtract){
 		// build the index
+		super();
 		buildIndex(trainingFile);
 		this.curSentiment = sentiment;
 		this.overfit = overfit;

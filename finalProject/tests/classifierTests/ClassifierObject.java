@@ -64,8 +64,6 @@ public class ClassifierObject {
 			System.out.println(classifier.classify(testDocs.get(2)));
 			System.out.println(classifier.classify(testDocs.get(3)));
 			System.out.println(classifier.classify(testDocs.get(4)));
-			IndexReader reader = IndexReader.open(classifier.getIndex());
-			System.out.println(reader.numDocs());
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
