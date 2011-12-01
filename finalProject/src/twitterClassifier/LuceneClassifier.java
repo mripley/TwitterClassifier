@@ -8,8 +8,15 @@ import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Field.Index;
+import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermEnum;
@@ -20,6 +27,7 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.DocIdSet; 
+import org.apache.lucene.store.LockObtainFailedException;
 
 public class LuceneClassifier extends TwitterClassifier {
 
@@ -63,7 +71,61 @@ public class LuceneClassifier extends TwitterClassifier {
 	}
 	
 	@Override
-	public void classify(String query) {
+	public boolean classify(String query) throws Exception {
+		IndexReader reader = null;
+		IndexWriter writer = null;
+		IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_34, this.analyzer);
+		
+		try {
+			writer = new IndexWriter(index, config);
+			// create a new doc and add it to the collection
+			Document doc = new Document();
+			doc.add(new Field("text", query, Store.NO, Index.ANALYZED));
+			writer.addDocument(doc);
+			writer.commit();
+			writer.optimize();
+			writer.close();
+			double docRatio = this.categoryRatio;
+			reader = IndexReader.open(index);
+			// get all the terms in the index
+			TermEnum terms = reader.terms();
+			while(terms.next()){
+				Term t = terms.term();
+				TermDocs termDocs = reader.termDocs(t);
+				String word = t.text();
+				// get the probabilities for this word if it exists
+				if(wordSet.containsKey(word)){
+					double[] probs = wordSet.get(word);
+					if(probs[1] == 0.0){
+						// this word is a very good indicator so boost up its ranking 
+						docRatio *= (probs[0]/ .00001);
+					}
+					else{
+						docRatio *= probs[0] / probs[1];
+					}
+				}
+			}
+			return (docRatio > 1.0);
+		} catch (CorruptIndexException e) {
+			System.out.println("ERROR: Corrupt index in classify");
+			return false;
+		} catch (LockObtainFailedException e) {
+			System.out.println("ERROR: Could not obtain lock for index in classify");			
+			return false;
+		} catch (IOException e) {
+			System.out.println("ERROR: Caught IO exception in classify");
+			return false;
+		}
+		finally{
+			if(writer != null && IndexWriter.isLocked(index)){
+				IndexWriter.unlock(index);
+				writer.rollback();
+				writer.close();
+			}
+			if(reader != null){
+				reader.close();
+			}
+		}
 		
 	}
 

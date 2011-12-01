@@ -12,8 +12,8 @@ public class LingPipeClassifier extends TwitterClassifier {
 	}
 	
 	@Override
-	public void classify(String query) {
-		
+	public boolean classify(String query) {
+		return true;
 	}
 
 	@Override

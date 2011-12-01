@@ -22,7 +22,7 @@ public abstract class TwitterClassifier {
 		
 	}
 	
-	public abstract void classify(String query);
+	public abstract boolean classify(String query) throws Exception;
 	protected abstract void trainClassifier(String trainingFile) throws Exception;
 	
 	protected void buildIndex(String trainingFile){
