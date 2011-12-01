@@ -69,7 +69,7 @@ public class LuceneClassifier extends TwitterClassifier {
 		}
 		
 	}
-	
+		
 	@Override
 	public boolean classify(String query) throws Exception {
 		IndexReader reader = null;

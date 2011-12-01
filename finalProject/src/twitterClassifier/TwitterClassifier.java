@@ -17,7 +17,7 @@ import org.apache.lucene.util.Version;
 public abstract class TwitterClassifier {
 	
     protected RAMDirectory index = new RAMDirectory();
-    
+   
 	public TwitterClassifier(){
 		
 	}
@@ -74,4 +74,12 @@ public abstract class TwitterClassifier {
 		// return the newly created training index
 	}
 	
+	
+	public RAMDirectory getIndex() {
+		return index;
+	}
+
+	public void setIndex(RAMDirectory index) {
+		this.index = index;
+	}
 }
