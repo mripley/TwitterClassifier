@@ -9,6 +9,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.RAMDirectory;
@@ -19,7 +20,7 @@ public abstract class TwitterClassifier {
     protected RAMDirectory index = new RAMDirectory();
    
 	public TwitterClassifier(){
-		
+		index = new RAMDirectory();		// Create a new index in RAM
 	}
 	
 	public abstract boolean classify(String query) throws Exception;
@@ -34,19 +35,14 @@ public abstract class TwitterClassifier {
 			BufferedReader reader = new BufferedReader(new FileReader(trainingFile));
 			
 			// create a new index
-			index = new RAMDirectory();		// Create a new index in RAM
 			IndexWriterConfig indexConfig = new IndexWriterConfig(Version.LUCENE_34, new StandardAnalyzer(Version.LUCENE_34));
 			IndexWriter writer = new IndexWriter(index, indexConfig);
 			
 			// loop through all lines
 			while((currentLine = reader.readLine()) != null){
 				if(currentLine.startsWith("^^END^^")){	// found the end of the document
-					Document doc = new Document(); // build a new document
 					
-					// add fields to the document
-					doc.add(new Field("text", buf.toString(), Store.YES, Index.ANALYZED));
-					doc.add(new Field("sentiment", curSentiment, Store.YES, Index.ANALYZED));
-					writer.addDocument(doc);
+					addDocument(writer, buf.toString(), curSentiment);
 					buf = new StringBuffer();  // empty the buffer
 				}
 				else if(currentLine.startsWith("^^NEGATIVE^^")){
@@ -74,6 +70,20 @@ public abstract class TwitterClassifier {
 		// return the newly created training index
 	}
 	
+	public static void addDocument(IndexWriter writer, String text, String sentiment){
+		Document doc = new Document();
+		doc.add(new Field("text", text, Store.YES, Index.ANALYZED));
+		doc.add(new Field("sentiment", sentiment, Store.YES, Index.ANALYZED));
+		try {
+			writer.addDocument(doc);
+		} catch (CorruptIndexException e) {
+			System.out.println("Corrupt index in addDocument");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("IO exception in addDocument");
+			e.printStackTrace();
+		}
+	}
 	
 	public RAMDirectory getIndex() {
 		return index;

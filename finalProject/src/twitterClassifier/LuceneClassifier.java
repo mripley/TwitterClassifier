@@ -39,8 +39,9 @@ public class LuceneClassifier extends TwitterClassifier {
     protected double categoryRatio;
 	
 	public LuceneClassifier(String trainingFile, String sentiment){
+		super();
 		// build the index
-		buildIndex(trainingFile);
+		super.buildIndex(trainingFile);
 		this.curSentiment = sentiment;
 		this.overfit = false;
 		this.topFeatures = false;
