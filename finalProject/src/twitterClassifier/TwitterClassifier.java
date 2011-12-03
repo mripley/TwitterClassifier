@@ -41,8 +41,7 @@ public abstract class TwitterClassifier {
 			
 			// loop through all lines
 			while((currentLine = reader.readLine()) != null){
-				if(currentLine.startsWith("^^^END^^^")){	// found the end of the document
-					
+				if(currentLine.startsWith("^^^END^^^")){	// found the end of the document			
 					addDocument(writer, buf.toString(), curSentiment);
 					buf = new StringBuffer();  // empty the buffer
 				}
@@ -75,8 +74,8 @@ public abstract class TwitterClassifier {
 		Document doc = new Document();
 		doc.add(new Field("text", text, Store.YES, Index.ANALYZED));
 		doc.add(new Field("sentiment", sentiment, Store.YES, Index.ANALYZED));
-		try {
 		
+		try {
 			writer.addDocument(doc);
 		} catch (CorruptIndexException e) {
 			System.out.println("Corrupt index in addDocument");

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.FieldCache;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,17 +60,83 @@ public class ClassifierObject {
 	public void testClassify() {
 		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", false, false );
 		try {
+			assertTrue(classifier.classify(testDocs.get(0)));
+			assertFalse(classifier.classify(testDocs.get(1)));
+			assertFalse(classifier.classify(testDocs.get(2)));
+			assertFalse(classifier.classify(testDocs.get(3)));
+			assertFalse(classifier.classify(testDocs.get(4)));
+			
+		} catch (Exception e) {
+			System.out.println("caught exception in test clasify");
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testOverfit(){
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", true, false );
+		try {
+			
 			System.out.println(classifier.classify(testDocs.get(0)));
 			System.out.println(classifier.classify(testDocs.get(1)));
 			System.out.println(classifier.classify(testDocs.get(2)));
 			System.out.println(classifier.classify(testDocs.get(3)));
 			System.out.println(classifier.classify(testDocs.get(4)));
 			
+			assertTrue(classifier.classify(testDocs.get(0)));
+			assertFalse(classifier.classify(testDocs.get(1)));
+			assertFalse(classifier.classify(testDocs.get(2)));
+			assertFalse(classifier.classify(testDocs.get(3)));
+			assertFalse(classifier.classify(testDocs.get(4)));
+			
+		} catch (Exception e) {
+			System.out.println("caught exception in test clasify");
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testOverfitFeatureSelect(){
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", true, true );
+		try {
+			assertTrue(classifier.classify(testDocs.get(0)));
+			assertTrue(classifier.classify(testDocs.get(1)));
+			assertTrue(classifier.classify(testDocs.get(2)));
+			assertFalse(classifier.classify(testDocs.get(3)));
+			assertTrue(classifier.classify(testDocs.get(4)));
+			
+		} catch (Exception e) {
+			System.out.println("caught exception in test clasify");
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testFeatureSelect() {
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", false, true );
+		try {
+			assertTrue(classifier.classify(testDocs.get(0)));
+			assertTrue(classifier.classify(testDocs.get(1)));
+			assertTrue(classifier.classify(testDocs.get(2)));
+			assertFalse(classifier.classify(testDocs.get(3)));
+			assertTrue(classifier.classify(testDocs.get(4)));
+			
+		} catch (Exception e) {
+			System.out.println("caught exception in test clasify");
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testSentiment(){
+		LuceneClassifier classifier = new LuceneClassifier("resources/sentiment-test.txt", "positive", false, true );
+		
+		try {
+			assertTrue(classifier.classify("great"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertEquals(2,2);
 	}
 
 }

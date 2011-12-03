@@ -8,10 +8,20 @@ public class TwitterSearcher {
 		TwitterSearch ts = new TwitterSearch();
 		LuceneClassifier classifier = new LuceneClassifier("resources/training-set.txt", "positive");
 		ArrayList<TweetDoc> docs = ts.search("iPhone review");	
-		
-		for(TweetDoc t : docs){
-			System.out.println("From: " + t.getUserID() + " Text: " + t.getTweetText());
+		try {
+			for(TweetDoc t : docs){
+				if(classifier.classify(t.getTweetText())){
+					System.out.println("");
+				}
+			}
+		} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 		}
+			
+
+		
+		
 		
 		System.out.println("done");
 	}

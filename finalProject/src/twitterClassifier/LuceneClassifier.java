@@ -28,6 +28,7 @@ import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.DocIdSet; 
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.store.RAMDirectory;
 
 public class LuceneClassifier extends TwitterClassifier {
 
@@ -76,10 +77,11 @@ public class LuceneClassifier extends TwitterClassifier {
 	public boolean classify(String query) throws Exception {
 		IndexReader reader = null;
 		IndexWriter writer = null;
+		RAMDirectory queryIndex = new RAMDirectory();
 		IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_34, this.analyzer);
 		
 		try {
-			writer = new IndexWriter(index, config);
+			writer = new IndexWriter(queryIndex, config);
 			// create a new doc and add it to the collection
 			Document doc = new Document();
 			doc.add(new Field("text", query, Store.NO, Index.ANALYZED));
@@ -88,11 +90,16 @@ public class LuceneClassifier extends TwitterClassifier {
 			writer.optimize();
 			writer.close();
 			double docRatio = this.categoryRatio;
-			reader = IndexReader.open(index);
+			reader = IndexReader.open(queryIndex);
 			// get all the terms in the index
 			TermEnum terms = reader.terms();
 			while(terms.next()){
 				Term t = terms.term();
+				
+				if(t.field() == "sentiment"){
+					continue;
+				}
+				
 				TermDocs termDocs = reader.termDocs(t);
 				String word = t.text();
 				// get the probabilities for this word if it exists
@@ -147,12 +154,17 @@ public class LuceneClassifier extends TwitterClassifier {
 			// grab all the individual terms out of all matched docs. 
 			TermEnum docTerms = reader.terms();
 			
-			double nWords = 0;
-			double nUniqueWords = 0;
+			double nWords = 0.0;
+			double nUniqueWords = 0.0;
 			while(docTerms.next()){
-				double nWordsInCat = 0;
-				double nWordsNotInCat = 0;
+				double nWordsInCat = 0.0;
+				double nWordsNotInCat = 0.0;
 				Term t = docTerms.term();
+				
+				if(t.field() == "sentiment"){
+					continue;
+				}
+				
 				TermDocs termDocs = reader.termDocs(t);
 				
 				while(termDocs.next()){
@@ -186,8 +198,12 @@ public class LuceneClassifier extends TwitterClassifier {
 						probs[i] = ((probs[i]+1) / (nWords + nUniqueWords)); 
 					}
 					else{
-						probs[i] /= nWords;
+						probs[i] = probs[i]/ nWords;
 					}
+					
+//					if(probs[i] == 0.0D){
+//						System.out.println("Found zero prob with term probs["+i+"]"+ " "+ term);
+//					}
 				}
 			}
 			
@@ -218,24 +234,21 @@ public class LuceneClassifier extends TwitterClassifier {
 	// return the set of ID's that match the given category
 	private Set<Integer> getMatchingDocs(IndexReader reader, String category){
 	    Set<Integer> matchedDocIds = new HashSet<Integer>();
-	    try {
-	    	Filter categoryFilter = new CachingWrapperFilter(
-			      new QueryWrapperFilter(new TermQuery(
-			      new Term("sentiment", category))));
-		
-		    DocIdSet docIdSet;
-		    docIdSet = categoryFilter.getDocIdSet(reader);
-		    DocIdSetIterator docIdSetIterator;
-		    docIdSetIterator = docIdSet.iterator();
-		    int docId;
-
-			while ((docId = docIdSetIterator.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS) {
-				matchedDocIds.add(docId);
-			}
+		try {
+		    for(int i=0; i< reader.numDocs(); i++){
+		    	String value = reader.document(i).getFieldable("sentiment").stringValue() ;
+				if( value.equals(category)){
+					matchedDocIds.add(i);					
+				}
+		    }
+		} catch (CorruptIndexException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("Caught IO Exception in getMachingDOcs");
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 	    return matchedDocIds;
 	}
 }
