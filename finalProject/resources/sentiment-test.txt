@@ -1,0 +1,16 @@
+^^^POSITIVE^^^
+happy fun good happy
+^^^END^^^
+good great super great
+^^^END^^^
+great positive awesome cool
+^^^END^^^
+^^^NEGATIVE^^^
+bad terrible sad
+^^^END^^^
+horribe sad mad unhappy
+^^^END^^^
+broken messed up wrong
+^^^END^^^
+defective wrong mad bad terrible
+^^^END^^^

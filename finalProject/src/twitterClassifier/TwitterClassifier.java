@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+
+import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -19,7 +21,8 @@ import org.apache.lucene.util.Version;
 public abstract class TwitterClassifier {
 	
     protected RAMDirectory index = new RAMDirectory();
-   
+
+    
 	public TwitterClassifier(){
 		index = new RAMDirectory();		// Create a new index in RAM
 	}

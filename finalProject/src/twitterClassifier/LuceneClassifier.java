@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -34,6 +35,8 @@ public class LuceneClassifier extends TwitterClassifier {
 
 	private boolean topFeatures;
 	private boolean overfit;
+	// Custom stop list 
+
 	private Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_34);
 	private HashMap<String, double[]> wordSet;
 	private String curSentiment;
@@ -41,6 +44,7 @@ public class LuceneClassifier extends TwitterClassifier {
 	
 	public LuceneClassifier(String trainingFile, String sentiment){
 		super();
+
 		// build the index
 		super.buildIndex(trainingFile);
 		this.curSentiment = sentiment;
