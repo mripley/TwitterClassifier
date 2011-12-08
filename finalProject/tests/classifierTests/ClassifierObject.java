@@ -139,7 +139,7 @@ public class ClassifierObject {
 	
 	@Test
 	public void testCorpus(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/full-corpus.csv", "positive", true, true );
+		LuceneClassifier classifier = new LuceneClassifier("resources/twitter-sentiment.csv", "positive", true, true );
 		try {
 			System.out.println(classifier.classify("great fantastic super awesome"));
 		} catch (Exception e) {
@@ -148,6 +148,8 @@ public class ClassifierObject {
 		}
 		assertTrue(true);
 	}
+	
+	
 	
 
 }
