@@ -1,6 +1,7 @@
 package twitterClassifier;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
@@ -59,6 +61,42 @@ public abstract class TwitterClassifier {
 			writer.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("File " + trainingFile + " not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("Caught IO Exception in BuildIndex");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void buildIndexFile(String inputFile, String outputFile){
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+			
+			FSDirectory dir = FSDirectory.open(new File(outputFile));
+			// create a new index
+			IndexWriterConfig indexConfig = new IndexWriterConfig(Version.LUCENE_34, new StandardAnalyzer(Version.LUCENE_34));
+			IndexWriter writer = new IndexWriter(dir, indexConfig);
+			
+			String currentLine;
+			String text;
+			
+			while((currentLine = reader.readLine()) != null){
+				text = new String("");
+				String[] splitLine = currentLine.split(",");
+				// grab the category 
+				String category = splitLine[0].toLowerCase().trim();
+				
+				// concatenate the rest of the array back into the original document
+				for(int i=1; i< splitLine.length; i++){
+					text += splitLine[i];
+				}
+				addDocument(writer, text, category);				
+			}
+			writer.commit();
+			writer.optimize();
+			writer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File " + inputFile + " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			System.out.println("Caught IO Exception in BuildIndex");

@@ -43,6 +43,43 @@ public class ClassifierObject {
 			return null;
 		}
 	}
+	
+	public ArrayList<String[]> getTestData(String filename){
+		ArrayList<String[]> tests = new ArrayList<String[]>();
+		
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(filename));
+			
+			String curLine = new String("");
+			String text;
+			while((curLine = reader.readLine()) != null){
+				text = new String("");
+				String[] splitLine = curLine.split(",");
+				// grab the category 
+				String category = splitLine[0].toLowerCase().trim();
+				
+				// concatenate the rest of the array back into the original document
+				for(int i=1; i< splitLine.length; i++){
+					text += splitLine[i];
+				}
+				String[] test = new String[2];
+				test[0] = category;
+				test[1] = text;
+				tests.add(test);
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("File: " + filename + " Not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+		return tests;	
+	}
+	
 	@Before
 	public void loadTests(){
 		testDocs = new ArrayList<String>();
@@ -139,14 +176,17 @@ public class ClassifierObject {
 	
 	@Test
 	public void testCorpus(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/twitter-sentiment.csv", "positive", true, true );
+		
+		LuceneClassifier posClassifier = new LuceneClassifier("resources/twitter-sentiment.csv", "positive", true, true );
+		LuceneClassifier negClassifier = new LuceneClassifier("resources/twitter-sentiment.csv", "negative", true, true );
+		LuceneClassifier neutralClassifier = new LuceneClassifier("resources/twitter-sentiment.csv", "neutral", true, true );
 		try {
-			System.out.println(classifier.classify("great fantastic super awesome"));
+			assertTrue(posClassifier.classify("great fantastic super awesome"));
+			assertFalse(negClassifier.classify("great fantastic super awesome"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertTrue(true);
 	}
 	
 	
