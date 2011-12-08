@@ -46,7 +46,7 @@ public class LuceneClassifier extends TwitterClassifier {
 		super();
 
 		// build the index
-		super.buildIndex(trainingFile);
+		this.biuldIndexFromCSV(trainingFile);
 		this.curSentiment = sentiment;
 		this.overfit = false;
 		this.topFeatures = false;
@@ -63,7 +63,7 @@ public class LuceneClassifier extends TwitterClassifier {
 	public LuceneClassifier(String trainingFile, String sentiment, boolean overfit, boolean topFeatureExtract){
 		// build the index
 		super();
-		buildIndex(trainingFile);
+		this.biuldIndexFromCSV(trainingFile);
 		this.curSentiment = sentiment;
 		this.overfit = overfit;
 		this.topFeatures = topFeatureExtract;
@@ -204,10 +204,6 @@ public class LuceneClassifier extends TwitterClassifier {
 					else{
 						probs[i] = probs[i]/ nWords;
 					}
-					
-//					if(probs[i] == 0.0D){
-//						System.out.println("Found zero prob with term probs["+i+"]"+ " "+ term);
-//					}
 				}
 			}
 			

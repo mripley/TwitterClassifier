@@ -30,52 +30,45 @@ public abstract class TwitterClassifier {
 	public abstract boolean classify(String query) throws Exception;
 	protected abstract void trainClassifier(String trainingFile) throws Exception;
 	
-	protected void buildIndex(String trainingFile){
-		String currentLine; // current line in the file
-		String curSentiment = "positive";  // current sentiment for the doc
-		StringBuffer buf = new StringBuffer();  // concat all lines in this doc
+	protected void biuldIndexFromCSV(String trainingFile){
+		
 		try {
-			// open the training file and start reading lines
 			BufferedReader reader = new BufferedReader(new FileReader(trainingFile));
 			
 			// create a new index
 			IndexWriterConfig indexConfig = new IndexWriterConfig(Version.LUCENE_34, new StandardAnalyzer(Version.LUCENE_34));
 			IndexWriter writer = new IndexWriter(index, indexConfig);
 			
-			// loop through all lines
+			String currentLine;
+			String text;
+			
 			while((currentLine = reader.readLine()) != null){
-				if(currentLine.startsWith("^^^END^^^")){	// found the end of the document			
-					addDocument(writer, buf.toString(), curSentiment);
-					buf = new StringBuffer();  // empty the buffer
+				text = new String("");
+				String[] splitLine = currentLine.split(",");
+				// grab the category 
+				String category = splitLine[0].toLowerCase().trim();
+				
+				// concatenate the rest of the array back into the original document
+				for(int i=1; i< splitLine.length; i++){
+					text += splitLine[i];
 				}
-				else if(currentLine.startsWith("^^^NEGATIVE^^^")){
-					curSentiment = "negative"; // we've switched from positive docs to negative docs.
-				}
-				else if(currentLine.startsWith("^^^POSITIVE^^^")){
-					continue;
-				}
-				else{
-					// found a regular line. Add it to the buffer and continue
-					buf.append(currentLine);
-				}			
+				addDocument(writer, text, category);				
 			}
-			// commit these changes to the index.
 			writer.commit();
 			writer.optimize();
 			writer.close();
 		} catch (FileNotFoundException e) {
+			System.out.println("File " + trainingFile + " not found");
 			e.printStackTrace();
-			System.out.println("ERROR: File " + trainingFile + " Not Found!");
 		} catch (IOException e) {
-			System.out.println("ERROR: IO Exception caught in buildClassifier");
+			System.out.println("Caught IO Exception in BuildIndex");
 			e.printStackTrace();
 		}
-		// return the newly created training index
 	}
 	
 	public static void addDocument(IndexWriter writer, String text, String sentiment){
 		Document doc = new Document();
-		doc.add(new Field("text", text, Store.YES, Index.ANALYZED));
+		doc.add(new Field("text", cleanText(text), Store.YES, Index.ANALYZED));
 		doc.add(new Field("sentiment", sentiment, Store.YES, Index.ANALYZED));
 		
 		try {
@@ -87,6 +80,25 @@ public abstract class TwitterClassifier {
 			System.out.println("IO exception in addDocument");
 			e.printStackTrace();
 		}
+	}
+	
+	public static String cleanText(String input){
+		// replace all links with empty strings
+		String retval = input.replaceAll("(https?://([-\\w\\.]+)+(:\\d+)?(/([\\w/_\\.]*(\\?\\S+)?)?)?)", "");
+		
+		// replace all @ references
+		retval = retval.replaceAll("@[\\w*\\d([\\^$()#%)]]*", "");
+		
+		// replace all RT's
+		retval = retval.replaceAll("RT:?", "");
+		
+		retval = retval.replaceAll("\\d", "");
+		
+		// remove all hash tags
+		retval = retval.replaceAll("#\\w*", "");
+		
+		retval = retval.replaceAll("^\\w*", "");
+		return retval;
 	}
 	
 	public RAMDirectory getIndex() {

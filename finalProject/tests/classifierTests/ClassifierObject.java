@@ -58,7 +58,7 @@ public class ClassifierObject {
 
 	@Test
 	public void testClassify() {
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", false, false );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", false, false );
 		try {
 			assertTrue(classifier.classify(testDocs.get(0)));
 			assertFalse(classifier.classify(testDocs.get(1)));
@@ -74,7 +74,7 @@ public class ClassifierObject {
 	
 	@Test
 	public void testOverfit(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", true, false );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", true, false );
 		try {
 						
 			assertTrue(classifier.classify(testDocs.get(0)));
@@ -91,13 +91,13 @@ public class ClassifierObject {
 	
 	@Test
 	public void testOverfitFeatureSelect(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", true, true );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", true, true );
 		try {
 				
 			assertTrue(classifier.classify(testDocs.get(0)));
 			assertTrue(classifier.classify(testDocs.get(1)));
 			assertTrue(classifier.classify(testDocs.get(2)));
-			assertFalse(classifier.classify(testDocs.get(3)));
+			assertTrue(classifier.classify(testDocs.get(3)));
 			assertTrue(classifier.classify(testDocs.get(4)));
 			
 		} catch (Exception e) {
@@ -108,14 +108,14 @@ public class ClassifierObject {
 	
 	@Test
 	public void testFeatureSelect() {
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.txt", "positive", false, true );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", false, true );
 		try {
 			
 				
 			assertTrue(classifier.classify(testDocs.get(0)));
 			assertTrue(classifier.classify(testDocs.get(1)));
 			assertTrue(classifier.classify(testDocs.get(2)));
-			assertFalse(classifier.classify(testDocs.get(3)));
+			assertTrue(classifier.classify(testDocs.get(3)));
 			assertTrue(classifier.classify(testDocs.get(4)));
 			
 		} catch (Exception e) {
@@ -126,10 +126,11 @@ public class ClassifierObject {
 	
 	@Test
 	public void testSentiment(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/sentiment-test.txt", "positive", false, true );
+		LuceneClassifier classifier = new LuceneClassifier("resources/sentiment-test.csv", "positive", false, true );
 		
 		try {
 			assertTrue(classifier.classify("great"));
+			assertFalse(classifier.classify("horrible"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,15 +138,15 @@ public class ClassifierObject {
 	}
 	
 	@Test
-	public void testEmoticons(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/sentiment-test.txt", "positve", true, true );
-		
-		try{
-			assertTrue(classifier.classify(":)"));
+	public void testCorpus(){
+		LuceneClassifier classifier = new LuceneClassifier("resources/full-corpus.csv", "positive", true, true );
+		try {
+			System.out.println(classifier.classify("great fantastic super awesome"));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		catch(Exception e){
-			
-		}
+		assertTrue(true);
 	}
 	
 

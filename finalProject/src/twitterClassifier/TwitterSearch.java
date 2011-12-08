@@ -19,21 +19,23 @@ public class TwitterSearch {
 	public ArrayList<TweetDoc> search(String queryString){
 		ArrayList<TweetDoc> retval = new ArrayList<TweetDoc>();
 		
-	    Query query = new Query(queryString);
-	    query.setRpp(100);
-	    query.setLang("en");
-	    QueryResult result;
-		try {
-			result = twitter.search(query);
-			List<Tweet> results = result.getTweets();
-			for(Tweet t : results){
-				retval.add(new TweetDoc(t));
+		for( int i=1; i< 15; i++){
+		    Query query = new Query(queryString);
+		    query.setRpp(100);
+		    query.setLang("en");
+		    query.setPage(i);
+		    QueryResult result;
+			try {
+				result = twitter.search(query);
+				List<Tweet> results = result.getTweets();
+				for(Tweet t : results){
+					retval.add(new TweetDoc(t));
+				}
+			    
+			} catch (TwitterException e) {
+				e.printStackTrace();
 			}
-		    
-		} catch (TwitterException e) {
-			e.printStackTrace();
 		}
-		
 		return retval;
 	}
 	

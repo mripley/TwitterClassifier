@@ -37,21 +37,20 @@ public class InfoGainSelector {
 	
 	public Map<String, double[]> getFeatures(){
 	   for (Word word : wordProbs) {
-		      if (word.getpInCat() > 0.0) {
+	      if (word.getpInCat() > 0.0) {
 		        word.setInfoGain(word.getpInCat() * Math.log(
 		          word.getpInCat() / ((word.getpInCat() + word.getpNotInCat()) * pCategory)));
-		      } else {
+	      } else {
 		        word.setInfoGain(0.0);
-		      }
-		    }
+	      }
+	    }
 		    Collections.sort(wordProbs);
 		    List<Word> topFeaturesList = wordProbs.subList(
 		      0, (int) Math.round(Math.sqrt(wordProbs.size())));
 		    Map<String,double[]> topFeatures = new HashMap<String,double[]>();
-		    for (Word topFeature : topFeaturesList) {
-		      topFeatures.put(topFeature.getTerm(), 
-		        new double[] {topFeature.getpInCat(), topFeature.getpNotInCat()});
-		    }
+	    for (Word topFeature : topFeaturesList) {
+	    	topFeatures.put(topFeature.getTerm(),  new double[] {topFeature.getpInCat(), topFeature.getpNotInCat()});
+	    }
 		    return topFeatures;
 	}
 	
