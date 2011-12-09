@@ -5,15 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
-import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
@@ -22,11 +19,11 @@ import org.apache.lucene.util.Version;
 
 public abstract class TwitterClassifier {
 	
-    protected RAMDirectory index = new RAMDirectory();
-
+    //protected RAMDirectory index = new RAMDirectory();
+    protected FSDirectory index;
     
 	public TwitterClassifier(){
-		index = new RAMDirectory();		// Create a new index in RAM
+		//index = new RAMDirectory();		// Create a new index in RAM
 	}
 	
 	public abstract boolean classify(String query) throws Exception;
@@ -136,14 +133,18 @@ public abstract class TwitterClassifier {
 		retval = retval.replaceAll("#\\w*", "");
 		
 		retval = retval.replaceAll("^\\w*", "");
+		retval = retval.replaceAll("&amp;", "");
+		retval = retval.replaceAll("&lt;", "");
+		retval = retval.replaceAll(" lol ", "laugh");
+
 		return retval;
 	}
 	
-	public RAMDirectory getIndex() {
-		return index;
-	}
-
-	public void setIndex(RAMDirectory index) {
-		this.index = index;
-	}
+//	public RAMDirectory getIndex() {
+//		return index;
+//	}
+//
+//	public void setIndex(RAMDirectory index) {
+//		this.index = index;
+//	}
 }

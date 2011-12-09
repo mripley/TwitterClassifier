@@ -1,5 +1,6 @@
 package twitterClassifier;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.DocIdSet; 
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 
@@ -46,7 +48,13 @@ public class LuceneClassifier extends TwitterClassifier {
 		super();
 
 		// build the index
-		this.biuldIndexFromCSV(trainingFile);
+		try {
+			index = FSDirectory.open(new File(trainingFile));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		//this.biuldIndexFromCSV(trainingFile);
 		this.curSentiment = sentiment;
 		this.overfit = false;
 		this.topFeatures = false;
@@ -63,7 +71,14 @@ public class LuceneClassifier extends TwitterClassifier {
 	public LuceneClassifier(String trainingFile, String sentiment, boolean overfit, boolean topFeatureExtract){
 		// build the index
 		super();
-		this.biuldIndexFromCSV(trainingFile);
+		//this.biuldIndexFromCSV(trainingFile);
+		// build the index
+		try {
+			index = FSDirectory.open(new File(trainingFile));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		this.curSentiment = sentiment;
 		this.overfit = overfit;
 		this.topFeatures = topFeatureExtract;

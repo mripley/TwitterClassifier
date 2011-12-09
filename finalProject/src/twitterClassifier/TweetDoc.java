@@ -66,6 +66,9 @@ public class TweetDoc {
 		retval = retval.replaceAll("#\\w*", "");
 		
 		retval = retval.replaceAll("^\\w*", "");
+		retval = retval.replaceAll("&amp;", "");
+		retval = retval.replaceAll("&lt;", "");
+		retval = retval.replaceAll(" lol ", "laugh");
 		return retval;
 	}
 	

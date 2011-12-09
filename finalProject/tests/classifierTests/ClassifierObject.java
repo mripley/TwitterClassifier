@@ -95,7 +95,7 @@ public class ClassifierObject {
 
 	@Test
 	public void testClassify() {
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", false, false );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.idx", "positive", false, false );
 		try {
 			assertTrue(classifier.classify(testDocs.get(0)));
 			assertFalse(classifier.classify(testDocs.get(1)));
@@ -111,7 +111,7 @@ public class ClassifierObject {
 	
 	@Test
 	public void testOverfit(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", true, false );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.idx", "positive", true, false );
 		try {
 						
 			assertTrue(classifier.classify(testDocs.get(0)));
@@ -128,7 +128,7 @@ public class ClassifierObject {
 	
 	@Test
 	public void testOverfitFeatureSelect(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", true, true );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.idx", "positive", true, true );
 		try {
 				
 			assertTrue(classifier.classify(testDocs.get(0)));
@@ -145,7 +145,7 @@ public class ClassifierObject {
 	
 	@Test
 	public void testFeatureSelect() {
-		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.csv", "positive", false, true );
+		LuceneClassifier classifier = new LuceneClassifier("resources/coffee-test-set.idx", "positive", false, true );
 		try {
 			
 				
@@ -163,7 +163,7 @@ public class ClassifierObject {
 	
 	@Test
 	public void testSentiment(){
-		LuceneClassifier classifier = new LuceneClassifier("resources/sentiment-test.csv", "positive", false, true );
+		LuceneClassifier classifier = new LuceneClassifier("resources/sentiment.idx", "positive", false, true );
 		
 		try {
 			assertTrue(classifier.classify("great"));
@@ -174,15 +174,46 @@ public class ClassifierObject {
 		}
 	}
 	
+//	@Test
+//	public void buildIndexs(){
+//		TwitterClassifier.buildIndexFile("resources/coffee-test-set.csv", "resources/coffee-test-set.idx");
+//		TwitterClassifier.buildIndexFile("resources/sentiment-test.csv", "resources/sentiment.idx");
+//		TwitterClassifier.buildIndexFile("resources/twitter-sentiment.csv", "resources/twitter-sentiment.idx");
+//	}
+	
 	@Test
 	public void testCorpus(){
 		
-		LuceneClassifier posClassifier = new LuceneClassifier("resources/twitter-sentiment.csv", "positive", true, true );
-		LuceneClassifier negClassifier = new LuceneClassifier("resources/twitter-sentiment.csv", "negative", true, true );
-		LuceneClassifier neutralClassifier = new LuceneClassifier("resources/twitter-sentiment.csv", "neutral", true, true );
+		LuceneClassifier posClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "positive", true, true );
+		LuceneClassifier negClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "negative", true, true );
+		LuceneClassifier neutralClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "neutral", true, true);
+		System.out.println("Training Complete!");
 		try {
-			assertTrue(posClassifier.classify("great fantastic super awesome"));
-			assertFalse(negClassifier.classify("great fantastic super awesome"));
+			int nCorrect = 0;
+			
+			ArrayList<String[]> testData = getTestData("resources/test-data.csv");
+			
+			for(String[] s : testData){
+				if(s[0].equals("positive")){
+					if(posClassifier.classify(s[1])){
+						nCorrect++;
+					}
+				}
+				else if(s[0].equals("negative")){
+					if(negClassifier.classify(s[1])){
+						nCorrect++;
+					}
+				}
+				else if(s[0].equals("neutral")){
+					if(neutralClassifier.classify(s[1])){
+						nCorrect++;
+					}
+				}
+			}
+			
+			System.out.println((float)(nCorrect)/(float)(testData.size()));
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
