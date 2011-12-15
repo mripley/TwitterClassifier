@@ -184,8 +184,8 @@ public class ClassifierObject {
 	@Test
 	public void testCorpus(){
 		
-		LuceneClassifier posClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "positive", true, true );
-		LuceneClassifier negClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "negative", true, true );
+		LuceneClassifier posClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "positive", true, true);
+		LuceneClassifier negClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "negative", true, true);
 		LuceneClassifier neutralClassifier = new LuceneClassifier("resources/twitter-sentiment.idx", "neutral", true, true);
 		System.out.println("Training Complete!");
 		try {
